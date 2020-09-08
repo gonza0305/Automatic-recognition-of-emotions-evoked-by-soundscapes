@@ -17,6 +17,8 @@ The models that have been evaluated are:
 * Extreme Gradient Boosting (XGBoost)
 * Convolutional Neural Network (CNN) 
 
+>All the evaluated models are located in the same file
+
 ## Installing / Getting started
 
 All the project was developed using Python and the installed libraries requiered are:
@@ -28,8 +30,8 @@ pip install keras
 pip install tensorflow
 pip install GPy 
 ```
-> Additional information:
-The code above is included in the .ipynb file of the project, and it install the required libraries for executing the project
+
+>The code above is included in the .ipynb file of the project, and it install the required libraries for executing the project
 
 For the correct operation of the program, it is recommended to have downloaded and extracted the Emo-soundscapes database with the link specified above. And that it is present in the same folder in which the project is located.
 
@@ -40,5 +42,4 @@ For the correct operation of the program, it is recommended to have downloaded a
 * Analysis and selection of the most important features of sounds in order to improve the accuracy in the prediction of valence and arousal
 * Design and tuning of a CNN using the log-mel spectrogram of the audio files
 
-> Additional information:
-All the evaluated models are located in the same file
+
