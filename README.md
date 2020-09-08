@@ -2,9 +2,9 @@
 
 ![uc3m](http://materplat.org/wp-content/uploads/LogoUC3M.jpg)
 
-#Master thesis:
+# Master thesis:
 
-#Automatic recognition of emotions evoked by soundscapes
+# Automatic recognition of emotions evoked by soundscapes
 
 
 Performance evaluation using different machine learning models, using the Emo-soundscapes database for predicting the arousal valence values using the 1213 audio files. Additional information of the database can be found at http://metacreation.net/emo-soundscapes/.
