@@ -30,7 +30,7 @@ pip install tensorflow
 pip install GPy 
 ```
 
->The code above is included in the .ipynb file of the project, and it install the required libraries for executing the project
+>The code above is included in the .ipynb file of the project and it install the required libraries for executing the project
 
 For the correct operation of the program, it is recommended to have downloaded and extracted the Emo-soundscapes database with the link specified above. And that it is present in the same folder in which the project is located.
 
@@ -42,3 +42,6 @@ For the correct operation of the program, it is recommended to have downloaded a
 * Design and tuning of a CNN using the log-mel spectrogram of the audio files
 
 
+## Licensing
+
+This work is licensed under Creative Commons Attribution – Non Commercial – Non Derivatives
