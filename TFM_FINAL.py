@@ -29,7 +29,7 @@ get_ipython().system('pip install GPy ')
 
 # #### Required Python libraries 
 
-# In[2]:
+# In[1]:
 
 
 import os
@@ -64,6 +64,7 @@ import time
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import GridSearchCV, ShuffleSplit
+from sklearn.preprocessing import Normalizer
 
 #Configuration
 get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'retina'")
@@ -71,7 +72,7 @@ get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'retina'")
 
 # ### Data reading and preproccesing
 
-# In[3]:
+# In[2]:
 
 
 
@@ -102,17 +103,27 @@ XData = XData.iloc[:,mask]
 print(XData.shape)
 
 
-# In[52]:
+# In[3]:
 
 
 XData
 
 
-# In[21]:
+# In[3]:
 
 
 Kfolds_cv = ShuffleSplit(n_splits=10, test_size=.20, random_state=42)
 Kfolds_cv2 = ShuffleSplit(n_splits=10, test_size=.20, random_state=42)
+
+#Function to compute the average permutation feature importance of the partitions for each feature
+def compute_feature_importance_of_folds(feature_importance_folds):
+    feature_importance = []
+    for i in range(np.shape(feature_importance_folds)[1]):
+        add = 0
+        for j in range(np.shape(feature_importance_folds)[0]):
+            add = add + feature_importance_folds[j][i]
+        feature_importance.append(add/(np.shape(feature_importance_folds)[0]))
+    return feature_importance
 
 
 # ## SVR:
@@ -136,7 +147,7 @@ param_grid_arousal_SVR = [
 
 # ### SVR with the 39 selected features
 
-# In[43]:
+# In[5]:
 
 
 
@@ -226,7 +237,7 @@ print((time.time()-start)/60)
 print("\n")
 
 
-# In[44]:
+# In[6]:
 
 
 print("Valence R2 SVR: {0:.3f}".format(np.mean(R2_valence_SVR_AllF)) + " std: {0:.3f}".format(np.std(R2_valence_SVR_AllF)))
@@ -236,18 +247,8 @@ print("Valence MSE SVR: {0:.3f}".format(np.mean(MSE_valence_SVR_AllF)) + " std: 
 print("Arousal MSE SVR: {0:.3f}".format(np.mean(MSE_arousal_SVR_AllF)) + " std: {0:.3f}".format(np.std(MSE_arousal_SVR_AllF)))
 
 
-# In[12]:
+# In[4]:
 
-
-#Function to compute the average permutation feature importance of the partitions for each feature
-def compute_feature_importance_of_folds(feature_importance_folds):
-    feature_importance = []
-    for i in range(np.shape(feature_importance_folds)[1]):
-        add = 0
-        for j in range(np.shape(feature_importance_folds)[0]):
-            add = add + feature_importance_folds[j][i]
-        feature_importance.append(add/(np.shape(feature_importance_folds)[0]))
-    return feature_importance
 
 
 final_feature_importance_train_valence_SVR = np.array(compute_feature_importance_of_folds(Feature_importance_train_valence_SVR))
@@ -1135,7 +1136,7 @@ print("Arousal MAT3 + RQ MSE: {0:.3f}".format(np.mean(MSE_scores_MAT3_RQ_arousal
 
 # Compute the average lengthscale values of the RQ kernel (best kernel) for all the partitions in the cross-validation:
 
-# In[47]:
+# In[6]:
 
 
 lengthscale_values_valence = []
@@ -1166,7 +1167,6 @@ for train_index, test_index in KFolds_shuffleSplit.split(XData):
     print("X train  shape: " , X_train_GP.shape)
     print("X test  shape: " , X_test_GP.shape)
    
-    
     kernel_valence_RQ = GPy.kern.RatQuad( input_dim=39 , ARD = True )
     GP_model_valence_RQ = GPy.models.GPRegression(X_train_GP , y_train_valence_GP.iloc[:,1].values.reshape([-1,1]), kernel_valence_RQ)
     GP_model_valence_RQ.optimize(messages=False, max_iters=2000)
@@ -1197,7 +1197,7 @@ lengthscale_values_valence = np.array(compute_feature_importance_of_folds(np.arr
 lengthscale_values_arousal = np.array(compute_feature_importance_of_folds(np.array(lengthscale_values_arousal)))
 
 
-# In[51]:
+# In[7]:
 
 
 print("Valence R2 RF: {0:.3f}".format(np.mean(R2_valence_GP_AllF)) + " std {0:.3f}".format(np.std(R2_valence_GP_AllF)))
@@ -1396,7 +1396,7 @@ print("Arousal MSE GPR: {0:.3f}".format(np.mean(MSE_arousal_GP_5F)) + " std {0:.
 
 # ### XGBOOST:
 
-# In[33]:
+# In[57]:
 
 
 YvalenceXGB = pd.DataFrame(Yvalence) 
@@ -1604,7 +1604,7 @@ plt.show()
 
 # The subsets of the most important features are created based on the results of the previous graphs:
 
-# In[38]:
+# In[55]:
 
 
 XData_10_features_valence_XGB = ['loudness_std','spread_mean','inharmonicity_std',
@@ -1712,7 +1712,7 @@ print("Arousal MSE XGB: {0:.3f}".format(np.mean(MSE_arousal_XGB_10F)) + " std {0
 
 # ### XGBoost with the 5 most important features
 
-# In[41]:
+# In[58]:
 
 
 
@@ -1787,7 +1787,7 @@ print((time.time()-start)/60)
 print("\n")
 
 
-# In[42]:
+# In[59]:
 
 
 print("Valence R2 XGB: {0:.3f}".format(np.mean(R2_valence_XGB_5F)) + " std {0:.3f}".format(np.std(R2_valence_XGB_5F)))
@@ -1799,7 +1799,20 @@ print("Arousal MSE XGB: {0:.3f}".format(np.mean(MSE_arousal_XGB_5F)) + " std {0:
 
 # ### CNN
 
-# In[ ]:
+# In[4]:
+
+
+#Function to compute the average of the patches outputs
+def average_output_of_patches(predicted_values):
+    predicted_values = np.array(predicted_values)
+    average_values = []
+    i = 0
+    iterations = int(predicted_values.shape[0]/6)
+    for j in range( 0, iterations):
+        average_aux = np.average(predicted_values[i:i+6])
+        average_values.append(average_aux)
+        i = i + 6
+    return average_values
 
 
 
@@ -1900,7 +1913,7 @@ def getNormMelPatches(y_dataset):
 
 
 
-# In[ ]:
+# In[5]:
 
 
 #CNN architecture
@@ -1940,7 +1953,7 @@ def build_cnn(activation = 'softsign',
     return model
 
 
-# In[ ]:
+# In[8]:
 
 
 YvalenceCNN = pd.DataFrame(Yvalence) 
@@ -1951,18 +1964,21 @@ R2_valence_CNN = []
 MSE_valence_CNN = []
 R2_arousal_CNN = []
 MSE_arousal_CNN = []
-start = time.time()
+Feature_importance_train_valence_CNN = []
+Feature_importance_test_valence_CNN = []
+Feature_importance_train_arousal_CNN  = []
+Feature_importance_test_arousal_CNN  = []
 
+start = time.time()
+iteration = 0
 
 for train_index, test_index in Kfolds_cv2.split(XData):
 
- 
-    print("TRAIN:", train_index.shape, "TEST:", test_index.shape)
-
+    print("ITERATION: ", iteration)
+    
     X_train_CNN, X_test_CNN = XData.iloc[ train_index , :], XData.iloc[ test_index , : ]
     y_train_valence_CNN, y_test_valence_CNN = YvalenceCNN.iloc[train_index,:],  YvalenceCNN.iloc[test_index , :]
     y_train_arousal_CNN, y_test_arousal_CNN = YarousalCNN.iloc[train_index,:],  YarousalCNN.iloc[test_index, :]
-    
     
     y_train_valence_CNN = y_train_valence_CNN.to_numpy()
     y_test_valence_CNN = y_test_valence_CNN.to_numpy()
@@ -1986,28 +2002,31 @@ for train_index, test_index in Kfolds_cv2.split(XData):
     
     CNN_y_predicted_valence = model_CNN_valence.predict(normalized_pathes_test_valence)
 
-    MSE_valence_CNN.append( mean_squared_error( y_patches_test_valence, CNN_y_predicted_valence) )
-    R2_valence_CNN.append( r2_score(y_patches_test_valence , CNN_y_predicted_valence) )
+    CNN_y_predicted_valence = np.array(average_output_of_patches(CNN_y_predicted_valence))
+        
+    MSE_valence_CNN.append( mean_squared_error( y_test_valence_CNN[:,1], CNN_y_predicted_valence) )
+    R2_valence_CNN.append( r2_score(y_test_valence_CNN[:,1] , CNN_y_predicted_valence) )
     
     #AROUSAL
     model_CNN_arousal = KerasRegressor(build_fn = build_cnn, verbose=True, epochs=53, batch_size=32)
 
-    history_valence = model_CNN_arousal.fit(normalized_pathes_train_arousal, y_patches_train_arousal)
+    history_arousal = model_CNN_arousal.fit(normalized_pathes_train_arousal, y_patches_train_arousal)
 
     CNN_y_predicted_arousal = model_CNN_arousal.predict(normalized_pathes_test_arousal)
 
-    MSE_arousal_CNN.append(mean_squared_error(y_patches_test_arousal , CNN_y_predicted_arousal))
-    R2_arousal_CNN.append(r2_score(y_patches_test_arousal , CNN_y_predicted_arousal))
-
-
+    CNN_y_predicted_arousal = np.array(average_output_of_patches(CNN_y_predicted_arousal))
     
+    MSE_arousal_CNN.append(mean_squared_error(y_test_arousal_CNN[:,1] , CNN_y_predicted_arousal))
+    R2_arousal_CNN.append(r2_score(y_test_arousal_CNN[:,1] , CNN_y_predicted_arousal))
+    iteration = iteration +1
+
     
 print("Time (minutes):")
 print((time.time()-start)/60)
 print("\n")
 
 
-# In[ ]:
+# In[9]:
 
 
 print("Valence R2 CNN: {0:.3f}".format(np.mean(R2_valence_CNN)) + " std {0:.3f}".format(np.std(R2_valence_CNN)))
@@ -2021,20 +2040,20 @@ print("Arousal MSE CNN: {0:.3f}".format(np.mean(MSE_arousal_CNN)) + " std {0:.3f
 # In[ ]:
 
 
-model = KerasRegressor(build_fn = build_cnn_PAPER, verbose=True, epochs=53, batch_size=32)
+model = KerasRegressor(build_fn = build_cnn, verbose=True, epochs=53, batch_size=32)
 
 param_grid = {
                #'kernel_size': [1,3,5],
                #'filters1': [16,32,64],
                #'filters2': [16,32,64],
-               #'param1': [1,2,3,4],
-               #'param2': [1,2,3,4]
+               'param1': [1,2,3,4],
+               'param2': [1,2,3,4]
               #'epochs':     [1000],
               #'neurons' : [32,64,128],
               #'batch_size':  [10, 20, 40, 60, 80, 100],
               #'weight_constraint' : [1,2,3,4,5],
               #'optimizer':   ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam'],
-              'dropout_rate':[0.1,0.3,0.5],
+              #'dropout_rate':[0.1,0.3,0.5],
               #'activation':  ['softmax', 'softplus', 'softsign', 'relu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear'],
               #'init_mode':   ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glorot_uniform', 'he_normal', 'he_uniform'],
               #'learning_rate' : [0.001, 0.01, 0.1, 0.2, 0.3],
@@ -2048,11 +2067,17 @@ gridsearchModel = GridSearchCV(
         cv=5,
         refit='r2',
         verbose=True,
-        n_jobs=-1
+        n_jobs=4
         )
 
 
-gridsearchModel.fit(normalized_pathes_train_valence, y_patches_train_valence)
+gridsearchModel.fit(normalized_pathes_train_arousal, y_patches_train_arousal)
 
 print("Best: %f using %s" % (gridsearchModel.best_score_, gridsearchModel.best_params_))
+
+
+# In[ ]:
+
+
+
 
