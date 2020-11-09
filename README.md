@@ -1,4 +1,4 @@
-![uc3m](http://materplat.org/wp-content/uploads/LogoUC3M.jpg)
+
 
 ## Gonzalo Lencina Lorenzon
 ## Master thesis:
