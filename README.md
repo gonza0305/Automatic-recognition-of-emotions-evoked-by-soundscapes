@@ -1,7 +1,4 @@
-
-
-## Gonzalo Lencina Lorenzon
-## Master thesis:
+## Master thesis
 
 # Automatic recognition of emotions evoked by soundscapes
 
